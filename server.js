@@ -50,6 +50,17 @@ var urlSchema = new Schema({
 
 var Url = mongoose.model('Url',urlSchema);
 
+var getNextId = function(){
+ var currentId = Url.find().sort({id:-1}).limit(1);
+ if(!isNaN(currentId)) {
+   console.log('got max id ' + currentId);
+   return currentId++;
+ }
+ else {
+   console.log('invalid id  ' + currentId);
+   return 0;
+ }
+}
 var createAndSaveUrl = function(urlStr) {
  var nextId = 0;// get the id
  var shortUrl = urlStr;
@@ -98,7 +109,9 @@ function processPostedInput(req,res) {
     result['short_url'] = shortUrl;
   }
   else {    
-    createAndSaveUrl(originalUrl);
+    //result['short_url']  = createAndSaveUrl(originalUrl);
+    console.log('doesnot exist');
+    getNextId();
   }
   return res.json(result); 
 }
