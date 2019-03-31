@@ -1,6 +1,7 @@
 {
 	"name": "shorturl",
 	"version": "0.0.1",
+  "author": "Sreekanth Vedavyas",
 	"description": "API project for freeCodeCamp",
 	"main": "server.js",
 	"scripts": {

@@ -31,6 +31,16 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+//paths
+var ROOT_PATH = '/';
+var SHORTEN_URL_PATH = ROOT_PATH + 'api/shorturl/new';
+
+function processPostedUrl(req,res) {
+  var originalUrl = req.body.url_input;
+  return res.json({original_url: originalUrl}); 
+}
+
+app.post(SHORTEN_URL_PATH,processPostedUrl);
 
 app.listen(port, function () {
   console.log('Node.js listening ...');
