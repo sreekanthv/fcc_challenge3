@@ -50,16 +50,27 @@ var urlSchema = new Schema({
 
 var Url = mongoose.model('Url',urlSchema);
 
-var createAndSaveUrl = function(urlStr,done) {
+var createAndSaveUrl = function(urlStr) {
  var nextId = 0;// get the id
  var shortUrl = urlStr;
  var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
  url.save((err, data)=>{
-  if (err) return done(err)
-  return done(null, data);
+  if (err){console.log('failed to create url'); return undefined};
+  return shortUrl;
  })
 };
 
+var findShortUrlIfExists = function(urlStr) {
+  Url.findOne({originalUrl: urlStr},{shortUrl:1},(err, data)=>{
+  if (err) {
+    console.log('failed to fetch url'); 
+    return undefined;
+  }
+  else {
+    return data;
+  }
+ });
+}; 
 function validateURL(url) {
   var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   if(url.match(urlRegex)) {
@@ -72,7 +83,7 @@ function validateURL(url) {
   }
 }
 
-function processPostedUrl(req,res) {  
+function processPostedInput(req,res) {  
   //console.log(req);
   var originalUrl = req.body.url;
   if(!validateURL(originalUrl)) {
@@ -80,12 +91,13 @@ function processPostedUrl(req,res) {
   }
   //create url
   //get the last number from the db;
-  
+  //createAndSaveUrl(originalUrl);
+  console.log(findShortUrlIfExists(
   return res.json({original_url: originalUrl}); 
 }
 
 
-app.route(SHORTEN_URL_PATH).post(processPostedUrl);
+app.route(SHORTEN_URL_PATH).post(processPostedInput);
 
 app.listen(port, function () {
   console.log('Node.js listening ...');
