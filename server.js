@@ -86,8 +86,7 @@ var findShortUrlIfExists = function(urlStr) {
     return undefined;
   }
   else {
-    console.log(data);
-    console.log(data['shortUrl']);
+    console.log('fetched from db' + data['shortUrl']);
     return data['shortUrl'];
   }
  });
@@ -114,8 +113,7 @@ function processPostedInput(req,res) {
   var result = {original_url: originalUrl,short_url: ''};
   var shortUrl = findShortUrlIfExists(originalUrl);
   console.log("what is here" + shortUrl);
-  if(shortUrl !== '') {
-    console.log('fetched from db' + shortUrl);
+  if(shortUrl !== '' || shortUrl !== undefined) {    
     result.short_url = shortUrl;
   }
   else {    
