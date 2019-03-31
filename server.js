@@ -39,22 +39,29 @@ app.get('/', function(req, res){
 app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
+
+//db details
+
 function validateURL(url) {
-  var urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/
+  var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   if(url.match(urlRegex)) {
      console.log(url + " matches");
+    return true;
   }
   else {
      console.log(url + " not matches");
+    return false;
   }
-  
-  return true;
 }
 
 function processPostedUrl(req,res) {  
   //console.log(req);
   var originalUrl = req.body.url;
-  validateURL(originalUrl);
+  if(!validateURL(originalUrl)) {
+     return res.json({"error":"invalid URL"});
+  }
+  //create url
+  //get the last number from the db;
   
   return res.json({original_url: originalUrl}); 
 }
