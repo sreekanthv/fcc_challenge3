@@ -39,9 +39,23 @@ app.get('/', function(req, res){
 app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
+function validateURL(url) {
+  var urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/
+  if(url.match(urlRegex)) {
+     console.log(url + " matches");
+  }
+  else {
+     console.log(url + " not matches");
+  }
+  
+  return true;
+}
 
-function processPostedUrl(req,res) {  console.log(req);
+function processPostedUrl(req,res) {  
+  //console.log(req);
   var originalUrl = req.body.url;
+  validateURL(originalUrl);
+  
   return res.json({original_url: originalUrl}); 
 }
 
