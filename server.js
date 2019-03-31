@@ -62,23 +62,25 @@ var createAndSaveUrl = function(urlStr) {
 
 var findShortUrlIfExists = function(urlStr) {
   Url.findOne({originalUrl: urlStr},{shortUrl:1},(err, data)=>{
-  if (err) {
+  if (err || !data) {
     console.log('failed to fetch url'); 
     return undefined;
   }
   else {
-    return data;
+    console.log(data);
+    console.log(data['shortUrl']);
+    return data['shortUrl'];
   }
  });
 }; 
 function validateURL(url) {
   var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   if(url.match(urlRegex)) {
-     console.log(url + " matches");
+     //console.log(url + " matches");
     return true;
   }
   else {
-     console.log(url + " not matches");
+     //console.log(url + " not matches");
     return false;
   }
 }
@@ -89,11 +91,16 @@ function processPostedInput(req,res) {
   if(!validateURL(originalUrl)) {
      return res.json({"error":"invalid URL"});
   }
-  //create url
-  //get the last number from the db;
-  //createAndSaveUrl(originalUrl);
-  console.log(findShortUrlIfExists(
-  return res.json({original_url: originalUrl}); 
+    
+  var result = {original_url: originalUrl};
+  var shortUrl = findShortUrlIfExists(originalUrl);
+  if(shortUrl) {
+    result['short_url'] = shortUrl;
+  }
+  else {    
+    createAndSaveUrl(originalUrl);
+  }
+  return res.json(result); 
 }
 
 
