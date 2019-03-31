@@ -51,7 +51,15 @@ var urlSchema = new Schema({
 var Url = mongoose.model('Url',urlSchema);
 
 var getNextId = function(){
- var currentId = Url.find().sort({id:-1}).limit(1);
+  var currentId = 0;
+  var findQuery = Url.find().sort({id:-1}).limit(1);
+  findQuery.exec(function(err, maxResult){
+      if (err) {console.log('initial record');return currentId;}
+      else {
+        currentId = parseInt(maxResult[0]['id']);
+      }
+
+  }); 
  if(!isNaN(currentId)) {
    console.log('got max id ' + currentId);
    return currentId++;
@@ -62,8 +70,8 @@ var getNextId = function(){
  }
 }
 var createAndSaveUrl = function(urlStr) {
- var nextId = 0;// get the id
- var shortUrl = urlStr;
+ var nextId = getNextId();// get the id
+ var shortUrl = 'https://spectrum-soybean.glitch.me/api/shorturl/' + nextId;
  var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
  url.save((err, data)=>{
   if (err){console.log('failed to create url'); return undefined};
@@ -78,7 +86,7 @@ var findShortUrlIfExists = function(urlStr) {
     return undefined;
   }
   else {
-    console.log(data);
+    //console.log(data);
     console.log(data['shortUrl']);
     return data['shortUrl'];
   }
@@ -109,9 +117,8 @@ function processPostedInput(req,res) {
     result['short_url'] = shortUrl;
   }
   else {    
-    //result['short_url']  = createAndSaveUrl(originalUrl);
     console.log('doesnot exist');
-    getNextId();
+    result['short_url']  = createAndSaveUrl(originalUrl);       
   }
   return res.json(result); 
 }
