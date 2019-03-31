@@ -21,7 +21,7 @@ var cors = require('cors');
 var port = process.env.PORT || 3000;
 
 /** this project needs a db !! **/ 
-// mongoose.connect(process.env.MONGOLAB_URI);
+mongoose.connect(process.env.MONGOLAB_URI,{ useNewUrlParser: true });
 
 app.use(cors());
 
@@ -41,6 +41,24 @@ app.get("/api/hello", function (req, res) {
 });
 
 //db details
+var Schema = mongoose.Schema;
+
+var urlSchema = new Schema({
+  id: {type: Number, required: true},
+  originalUrl: String,
+  shortUrl: String});
+
+var Url = mongoose.model('Url',urlSchema);
+
+var createAndSaveUrl = function(urlStr,done) {
+ var nextId = 0;// get the id
+ var shortUrl = urlStr;
+ var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
+ url.save((err, data)=>{
+  if (err) return done(err)
+  return done(null, data);
+ })
+};
 
 function validateURL(url) {
   var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
@@ -65,6 +83,7 @@ function processPostedUrl(req,res) {
   
   return res.json({original_url: originalUrl}); 
 }
+
 
 app.route(SHORTEN_URL_PATH).post(processPostedUrl);
 
