@@ -3,10 +3,19 @@
 var express = require('express');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+var app = express();
+
+var bodyParser = require('body-parser');
+var bodyParse = bodyParser.urlencoded({extended: false});
+
+//paths
+var ROOT_PATH = '/';
+var SHORTEN_URL_PATH = ROOT_PATH + 'api/shorturl/new';
+app.use(ROOT_PATH,bodyParse);
 
 var cors = require('cors');
 
-var app = express();
+
 
 // Basic Configuration 
 var port = process.env.PORT || 3000;
@@ -31,16 +40,12 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-//paths
-var ROOT_PATH = '/';
-var SHORTEN_URL_PATH = ROOT_PATH + 'api/shorturl/new';
-
-function processPostedUrl(req,res) {
-  var originalUrl = req.body.url_input;
+function processPostedUrl(req,res) {  console.log(req);
+  var originalUrl = req.body.url;
   return res.json({original_url: originalUrl}); 
 }
 
-app.post(SHORTEN_URL_PATH,processPostedUrl);
+app.route(SHORTEN_URL_PATH).post(processPostedUrl);
 
 app.listen(port, function () {
   console.log('Node.js listening ...');
