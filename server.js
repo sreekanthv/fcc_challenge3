@@ -62,7 +62,7 @@ var getNextId = function(){
   }); 
  if(!isNaN(currentId)) {
    console.log('got max id ' + currentId);
-   return currentId++;
+   return ++currentId;
  }
  else {
    console.log('invalid id  ' + currentId);
@@ -86,7 +86,7 @@ var findShortUrlIfExists = function(urlStr) {
     return undefined;
   }
   else {
-    //console.log(data);
+    console.log(data);
     console.log(data['shortUrl']);
     return data['shortUrl'];
   }
@@ -111,14 +111,16 @@ function processPostedInput(req,res) {
      return res.json({"error":"invalid URL"});
   }
     
-  var result = {original_url: originalUrl};
+  var result = {original_url: originalUrl,short_url: ''};
   var shortUrl = findShortUrlIfExists(originalUrl);
-  if(shortUrl) {
-    result['short_url'] = shortUrl;
+  console.log("what is here" + shortUrl);
+  if(shortUrl !== '') {
+    console.log('fetched from db' + shortUrl);
+    result.short_url = shortUrl;
   }
   else {    
     console.log('doesnot exist');
-    result['short_url']  = createAndSaveUrl(originalUrl);       
+    result.short_url  = createAndSaveUrl(originalUrl);       
   }
   return res.json(result); 
 }
