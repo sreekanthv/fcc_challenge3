@@ -79,17 +79,20 @@ var createAndSaveUrl = function(urlStr) {
  })
 };
 
-var findShortUrlIfExists = function(urlStr) {
+function findShortUrlIfExists(urlStr) {
+  let shortUrl = '';
   Url.findOne({originalUrl: urlStr},{shortUrl:1},(err, data)=>{
   if (err || !data) {
     console.log('failed to fetch url'); 
-    return undefined;
   }
   else {
-    console.log('fetched from db' + data['shortUrl']);
-    return data['shortUrl'];
+    console.log('fetched from db ' + data['shortUrl']);
+    console.log( typeof (data['shortUrl']));
+    shortUrl = data['shortUrl'];
+    console.log(shortUrl);
   }
  });
+return shortUrl;
 }; 
 function validateURL(url) {
   var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
@@ -111,15 +114,16 @@ function processPostedInput(req,res) {
   }
     
   var result = {original_url: originalUrl,short_url: ''};
-  var shortUrl = findShortUrlIfExists(originalUrl);
-  console.log("what is here" + shortUrl);
-  if(shortUrl !== '' || shortUrl !== undefined) {    
+  //var shortUrl = findShortUrlIfExists(originalUrl);
+  console.log("what is here" + findShortUrlIfExists(originalUrl));
+  
+  /*if(shortUrl !== '' || shortUrl !== undefined) {    
     result.short_url = shortUrl;
   }
   else {    
     console.log('doesnot exist');
     result.short_url  = createAndSaveUrl(originalUrl);       
-  }
+  }*/
   return res.json(result); 
 }
 
