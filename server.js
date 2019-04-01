@@ -79,23 +79,25 @@ var createAndSaveUrl = function(urlStr) {
  })
 };
 
-function findShortUrlIfExists(urlStr) {
+var findShortUrlIfExists = function (urlStr,next) {
   let shortUrl = '';
   var findQuery = Url.findOne({originalUrl: urlStr});
   findQuery.exec((err, data)=>{
   if (err || !data) {
     console.log('failed to fetch url'); 
+    next(err);
   }
   else {
     console.log('fetched from db ' + data['shortUrl']);
     console.log( typeof (data['shortUrl']));
     shortUrl = data['shortUrl'];
     console.log(shortUrl);
+    
   }
  });
 return shortUrl;
 }; 
-function validateURL(url) {
+function validateURL(url,next) {
   var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   if(url.match(urlRegex)) {
      //console.log(url + " matches");
