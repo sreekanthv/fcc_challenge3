@@ -81,7 +81,8 @@ var createAndSaveUrl = function(urlStr) {
 
 function findShortUrlIfExists(urlStr) {
   let shortUrl = '';
-  Url.findOne({originalUrl: urlStr},{shortUrl:1},(err, data)=>{
+  var findQuery = Url.findOne({originalUrl: urlStr});
+  findQuery.exec((err, data)=>{
   if (err || !data) {
     console.log('failed to fetch url'); 
   }
@@ -114,8 +115,8 @@ function processPostedInput(req,res) {
   }
     
   var result = {original_url: originalUrl,short_url: ''};
-  //var shortUrl = findShortUrlIfExists(originalUrl);
-  console.log("what is here" + findShortUrlIfExists(originalUrl));
+  var shortUrl = findShortUrlIfExists(originalUrl);
+  console.log("what is here" + shortUrl);
   
   /*if(shortUrl !== '' || shortUrl !== undefined) {    
     result.short_url = shortUrl;
