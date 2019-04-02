@@ -50,12 +50,12 @@ var urlSchema = new Schema({
 
 var Url = mongoose.model('Url',urlSchema);
 
-function getNextId(res,callback){
+function getNextId(res,callback,callback2){
   var currentId = 0;
   var findQuery = Url.find().sort({id:-1}).limit(1);
   findQuery.exec(function(err, maxResult){
       if (err) {console.log('initial record');
-               curre}
+               callback(null,0,res);}
       else {
         currentId = parseInt(maxResult[0]['id']);
       }
@@ -63,22 +63,22 @@ function getNextId(res,callback){
   }); 
  if(!isNaN(currentId)) {
    console.log('got max id ' + currentId);
-   callback(null,++currentId,res)
+   callback(null,++currentId,res,callback2)
  }
  else {
    console.log('invalid id  ' + currentId);
-   callback(null,0,res);
+   callback(null,0,res,callback2);
  }
 }
 function createAndSaveUrl (urlStr,res,callback1) {
- var nextId = getNextId(res,SaveUrl);// get the id
+ var nextId = getNextId(res,SaveUrl,formResult);// get the id
 };
 function SaveUrl(urlStr,nextId,res,callback) {
  var shortUrl = 'https://spectrum-soybean.glitch.me/api/shorturl/' + nextId;
  var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
  url.save((err, data)=>{
   if (err){console.log('failed to create url'); callback(err)};
-  callback(urlStr,shortUrl,res);
+  callback(null,urlStr,shortUrl,res);
   });
 }
 
@@ -102,7 +102,7 @@ function returnResponse(urlStr,res,callback) {
 
 function formResult(originalUrl,shortUrl,res) {
   var result = {original_url: originalUrl,short_url: shortUrl};
-  return res.json(result);
+  res.json(result);
 }
 
 function returnUrl(originalUrl,dbUrl,res) {
@@ -123,7 +123,7 @@ function processPostedInput(req,res) {
   if(!validateURL(originalUrl)) {
      return res.json({"error":"invalid URL"});
   }    
-  returnResponse(originalUrl,returnUrl,res);    
+  returnResponse(originalUrl,res,returnUrl);    
 }
 
 
