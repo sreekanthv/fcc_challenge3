@@ -16,7 +16,7 @@ app.use(ROOT_PATH,bodyParse);
 
 var cors = require('cors');
 
-
+var result ;
 
 // Basic Configuration 
 var port = process.env.PORT || 3000;
@@ -63,7 +63,7 @@ function processPostedInput(req,res) {
   if(!validateURL(originalUrl)) {
      return res.json({"error":"invalid URL"});
   }    
-  var result = returnResponse(originalUrl,returnUrl);    
+  returnResponse(originalUrl,returnUrl);    
   console.log(result);
   return res.json(result);
 }
@@ -85,11 +85,11 @@ function returnResponse(urlStr,callback) {
 function returnUrl(originalUrl,urlRec) {
   if(urlRec !== undefined) {    
     console.log('no errors');
-    return formResult(originalUrl,urlRec['id'])
+    formResult(originalUrl,urlRec['id'])
   }
   else {    
     console.log('doesnot exist');
-    return createAndSaveUrl(originalUrl,formResult);       
+    createAndSaveUrl(originalUrl,formResult);       
   }
 }
 
@@ -103,10 +103,9 @@ function createAndSaveUrl(urlStr,callback) {
   });
 }
 
-function formResult(err,originalUrl,id) {
-  if(err) { return 'Invalid'};
-  var result = {original_url: originalUrl,short_url: id};
-  return result;
+function formResult(err,originalUrl,id,) {
+  if(err) {  ;  
+  result = {original_url: originalUrl,short_url: id};
 }
 
 
