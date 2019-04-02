@@ -65,11 +65,13 @@ function processPostedInput(req,res) {
      return res.json({"error":"invalid URL"});
   }    
   returnResponse(originalUrl,returnUrl,
-                function(error,result) => ((error){
-    return res.json({"error":"invalid URL"}
-  }else {
-    return res.json(result);         
-  })
+                function postResponse(error,result) {
+      if(error){
+        return res.json({"error":"invalid URL"});
+      }else {
+        return res.json(result);   
+      }
+    }
   );      
   
 }
@@ -79,10 +81,10 @@ function returnResponse(urlStr,callback) {
   findQuery.exec((err, data)=>{
   if (err || !data) {
     console.log('failed to fetch url'); 
-    callback(err);
+    return callback(err);
   }
   else {
-    callback(null,urlStr,data);
+    return callback(null,urlStr,data);
   }
  });
 };
@@ -90,7 +92,7 @@ function returnResponse(urlStr,callback) {
 function returnUrl(originalUrl,urlRec) {
   if(urlRec !== undefined) {    
     console.log('no errors');
-    formResult(originalUrl,urlRec['id'],postResponse)
+    formResult(originalUrl,urlRec['id'])
   }
   else {    
     console.log('doesnot exist');
@@ -104,16 +106,16 @@ function createAndSaveUrl(urlStr,callback) {
   if (err){console.log('failed to create url'); callback(err)}
   else {
     console.log(data);
-    callback(null,data['id'],postResponse);}
+    callback(null,data['id']);}
   });
 }
 
 function formResult(err,originalUrl,id,callback) {
   if(err) {
-    callback();
+    return {error : 'Invalid URL'};
   } else{
     result = {original_url: originalUrl,short_url: id};
-  callback();
+   return result;
   };
 }
 
