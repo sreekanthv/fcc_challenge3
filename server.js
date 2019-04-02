@@ -102,17 +102,17 @@ function returnResponse(urlStr,res,callback) {
 
 function formResult(originalUrl,shortUrl,res) {
   var result = {original_url: originalUrl,short_url: shortUrl};
-  res.json(result);
+  return res.json(result);
 }
 
 function returnUrl(originalUrl,dbUrl,res) {
   var result = {original_url: originalUrl,short_url: dbUrl};
   if(dbUrl !== '' || dbUrl !== undefined) {    
-    formResult(originalUrl,dbUrl,res)
+    return formResult(originalUrl,dbUrl,res)
   }
   else {    
     console.log('doesnot exist');
-    result.short_url  = createAndSaveUrl(originalUrl,res,formResult);       
+    return createAndSaveUrl(originalUrl,res,formResult);       
   }
 }
 
