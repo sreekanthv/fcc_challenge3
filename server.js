@@ -3,6 +3,7 @@
 var express = require('express');
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+var autoIncrement = require('mongoose-auto-increment');
 var app = express();
 
 var bodyParser = require('body-parser');
@@ -19,10 +20,6 @@ var cors = require('cors');
 
 // Basic Configuration 
 var port = process.env.PORT || 3000;
-
-/** this project needs a db !! **/ 
-mongoose.connect(process.env.MONGOLAB_URI,{ useNewUrlParser: true });
-
 app.use(cors());
 
 /** this project needs to parse POST bodies **/
@@ -40,6 +37,12 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+
+/** this project needs a db !! **/ 
+var conn = mongoose.createConnection(process.env.MONGOLAB_URI,{ useNewUrlParser: true });
+autoIncrement.initialize(conn);
+
+
 //db details
 var Schema = mongoose.Schema;
 
@@ -48,7 +51,9 @@ var urlSchema = new Schema({
   originalUrl: String,
   shortUrl: String});
 
-var Url = mongoose.model('Url',urlSchema);
+urlSchema.plugin(autoIncrement.plugin, 'id');
+
+var Url = conn.model('Url',urlSchema);
 
 
 var validateURL = require('./utils.js').validateURL;
@@ -102,7 +107,7 @@ function formResult(originalUrl,shortUrl,resPonse) {
 
 function getNextId(urlStr,resPonse,callback,callback2){
   var currentId = 0;
-  var findQuery = Url.find().sort({id:-1}).limit(1);
+  var findQuery = 
   findQuery.exec(function(err, maxResult){
       if (err) {console.log('initial record');
                callback(null,0,resPonse);}
@@ -111,14 +116,14 @@ function getNextId(urlStr,resPonse,callback,callback2){
       }
 
   }); 
- if(!isNaN(currentId)) {
+ /*if(!isNaN(currentId)) {
    console.log('got max id ' + currentId);
    callback(null,urlStr,++currentId,resPonse,callback2)
  }
  else {
    console.log('invalid id  ' + currentId);
    callback(null,urlStr,0,resPonse,callback2);
- }
+ }*/
 }
 
 function SaveUrl(urlStr,nextId,resPonse,callback) {
