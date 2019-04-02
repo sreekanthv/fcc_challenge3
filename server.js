@@ -79,36 +79,35 @@ var createAndSaveUrl = function(urlStr) {
  })
 };
 
-var findShortUrlIfExists = function (urlStr,next) {
+function findShortUrlIfExists(urlStr,callback) {
   let shortUrl = '';
   var findQuery = Url.findOne({originalUrl: urlStr});
   findQuery.exec((err, data)=>{
   if (err || !data) {
     console.log('failed to fetch url'); 
-    next(err);
+    callback(err);
   }
   else {
     console.log('fetched from db ' + data['shortUrl']);
     console.log( typeof (data['shortUrl']));
     shortUrl = data['shortUrl'];
     console.log(shortUrl);
-    
+    callback(null,shortUrl);
   }
  });
-return shortUrl;
 }; 
-function validateURL(url,next) {
-  var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  if(url.match(urlRegex)) {
-     //console.log(url + " matches");
-    return true;
+
+function returnUrl(shortUrl,callback) {
+  if(shortUrl !== '' || shortUrl !== undefined) {    
+    result.short_url = shortUrl;
   }
-  else {
-     //console.log(url + " not matches");
-    return false;
+  else {    
+    console.log('doesnot exist');
+    result.short_url  = createAndSaveUrl(originalUrl);       
   }
 }
 
+var validateURL = require('./utils.js').validateURL;
 function processPostedInput(req,res) {  
   //console.log(req);
   var originalUrl = req.body.url;
@@ -117,16 +116,11 @@ function processPostedInput(req,res) {
   }
     
   var result = {original_url: originalUrl,short_url: ''};
+  
   var shortUrl = findShortUrlIfExists(originalUrl);
   console.log("what is here" + shortUrl);
   
-  /*if(shortUrl !== '' || shortUrl !== undefined) {    
-    result.short_url = shortUrl;
-  }
-  else {    
-    console.log('doesnot exist');
-    result.short_url  = createAndSaveUrl(originalUrl);       
-  }*/
+  
   return res.json(result); 
 }
 
