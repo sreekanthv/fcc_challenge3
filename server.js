@@ -50,39 +50,19 @@ var urlSchema = new Schema({
 
 var Url = mongoose.model('Url',urlSchema);
 
-function getNextId(res,callback,callback2){
-  var currentId = 0;
-  var findQuery = Url.find().sort({id:-1}).limit(1);
-  findQuery.exec(function(err, maxResult){
-      if (err) {console.log('initial record');
-               callback(null,0,res);}
-      else {
-        currentId = parseInt(maxResult[0]['id']);
-      }
 
-  }); 
- if(!isNaN(currentId)) {
-   console.log('got max id ' + currentId);
-   callback(null,++currentId,res,callback2)
- }
- else {
-   console.log('invalid id  ' + currentId);
-   callback(null,0,res,callback2);
- }
-}
-function createAndSaveUrl (urlStr,res,callback1) {
- var nextId = getNextId(res,SaveUrl,formResult);// get the id
-};
-function SaveUrl(urlStr,nextId,res,callback) {
- var shortUrl = 'https://spectrum-soybean.glitch.me/api/shorturl/' + nextId;
- var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
- url.save((err, data)=>{
-  if (err){console.log('failed to create url'); callback(err)};
-  callback(null,urlStr,shortUrl,res);
-  });
+var validateURL = require('./utils.js').validateURL;
+
+function processPostedInput(req,res) {  
+  //console.log(req);
+  var originalUrl = req.body.url;
+  if(!validateURL(originalUrl)) {
+     return res.json({"error":"invalid URL"});
+  }    
+  returnResponse(originalUrl,res,returnUrl);    
 }
 
-function returnResponse(urlStr,res,callback) {
+function returnResponse(urlStr,resPonse,callback) {
   let shortUrl = '';
   var findQuery = Url.findOne({originalUrl: urlStr});
   findQuery.exec((err, data)=>{
@@ -95,38 +75,60 @@ function returnResponse(urlStr,res,callback) {
     console.log( typeof (data['shortUrl']));
     shortUrl = data['shortUrl'];
     console.log(shortUrl);
-    callback(null,urlStr,shortUrl,res);
+    callback(null,urlStr,shortUrl,resPonse);
   }
  });
 };
 
-function formResult(originalUrl,shortUrl,res) {
-  var result = {original_url: originalUrl,short_url: shortUrl};
-  return res.json(result);
-}
-
-function returnUrl(originalUrl,dbUrl,res) {
+function returnUrl(originalUrl,dbUrl,resPonse) {
   var result = {original_url: originalUrl,short_url: dbUrl};
   if(dbUrl !== '' || dbUrl !== undefined) {    
-    return formResult(originalUrl,dbUrl,res)
+    return formResult(originalUrl,dbUrl,resPonse)
   }
   else {    
     console.log('doesnot exist');
-    return createAndSaveUrl(originalUrl,res,formResult);       
+    return createAndSaveUrl(originalUrl,resPonse,formResult);       
   }
 }
 
-var validateURL = require('./utils.js').validateURL;
-function processPostedInput(req,res) {  
-  //console.log(req);
-  var originalUrl = req.body.url;
-  if(!validateURL(originalUrl)) {
-     return res.json({"error":"invalid URL"});
-  }    
-  returnResponse(originalUrl,res,returnUrl);    
+function createAndSaveUrl (urlStr,resPonse,callback1) {
+ var nextId = getNextId(urlStr,resPonse,SaveUrl,formResult);// get the id
+};
+
+function formResult(originalUrl,shortUrl,resPonse) {
+  var result = {original_url: originalUrl,short_url: shortUrl};
+  resPonse.json(result);
 }
 
+function getNextId(urlStr,resPonse,callback,callback2){
+  var currentId = 0;
+  var findQuery = Url.find().sort({id:-1}).limit(1);
+  findQuery.exec(function(err, maxResult){
+      if (err) {console.log('initial record');
+               callback(null,0,resPonse);}
+      else {
+        currentId = parseInt(maxResult[0]['id']);
+      }
 
+  }); 
+ if(!isNaN(currentId)) {
+   console.log('got max id ' + currentId);
+   callback(null,urlStr,++currentId,resPonse,callback2)
+ }
+ else {
+   console.log('invalid id  ' + currentId);
+   callback(null,urlStr,0,resPonse,callback2);
+ }
+}
+
+function SaveUrl(urlStr,nextId,resPonse,callback) {
+ var shortUrl = 'https://spectrum-soybean.glitch.me/api/shorturl/' + nextId;
+ var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
+ url.save((err, data)=>{
+  if (err){console.log('failed to create url'); callback(err)};
+  callback(null,urlStr,shortUrl,resPonse);
+  });
+}
 app.route(SHORTEN_URL_PATH).post(processPostedInput);
 
 app.listen(port, function () {
