@@ -50,11 +50,12 @@ var urlSchema = new Schema({
 
 var Url = mongoose.model('Url',urlSchema);
 
-function getNextId(callback){
+function getNextId(res,callback){
   var currentId = 0;
   var findQuery = Url.find().sort({id:-1}).limit(1);
   findQuery.exec(function(err, maxResult){
-      if (err) {console.log('initial record');}
+      if (err) {console.log('initial record');
+               curre}
       else {
         currentId = parseInt(maxResult[0]['id']);
       }
@@ -62,24 +63,24 @@ function getNextId(callback){
   }); 
  if(!isNaN(currentId)) {
    console.log('got max id ' + currentId);
-   callback(null,++currentId)
+   callback(null,++currentId,res)
  }
  else {
    console.log('invalid id  ' + currentId);
-   callback(null,0);
+   callback(null,0,res);
  }
 }
-function createAndSaveUrl (urlStr,res,callback) {
- var nextId = getNextId(SaveUrl);// get the id
+function createAndSaveUrl (urlStr,res,callback1) {
+ var nextId = getNextId(res,SaveUrl);// get the id
 };
-function SaveUrl(urlStr,res) {
+function SaveUrl(urlStr,nextId,res,callback) {
  var shortUrl = 'https://spectrum-soybean.glitch.me/api/shorturl/' + nextId;
  var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
  url.save((err, data)=>{
-  if (err){console.log('failed to create url'); return undefined};
-  return shortUrl;
-  })
-          }
+  if (err){console.log('failed to create url'); callback(err)};
+  callback(urlStr,shortUrl,res);
+  });
+}
 
 function returnResponse(urlStr,res,callback) {
   let shortUrl = '';
@@ -97,18 +98,22 @@ function returnResponse(urlStr,res,callback) {
     callback(null,urlStr,shortUrl,res);
   }
  });
-}; 
+};
+
+function formResult(originalUrl,shortUrl,res) {
+  var result = {original_url: originalUrl,short_url: shortUrl};
+  return res.json(result);
+}
 
 function returnUrl(originalUrl,dbUrl,res) {
   var result = {original_url: originalUrl,short_url: dbUrl};
   if(dbUrl !== '' || dbUrl !== undefined) {    
-    result.short_url = dbUrl;
+    formResult(originalUrl,dbUrl,res)
   }
   else {    
     console.log('doesnot exist');
-    result.short_url  = createAndSaveUrl(originalUrl);       
+    result.short_url  = createAndSaveUrl(originalUrl,res,formResult);       
   }
-  return res.json(result); ;
 }
 
 var validateURL = require('./utils.js').validateURL;
@@ -118,7 +123,7 @@ function processPostedInput(req,res) {
   if(!validateURL(originalUrl)) {
      return res.json({"error":"invalid URL"});
   }    
-  return returnResponse(originalUrl,res,returnUrl);    
+  returnResponse(originalUrl,returnUrl,res);    
 }
 
 
