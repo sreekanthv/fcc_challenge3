@@ -64,14 +64,15 @@ function processPostedInput(req,res) {
   if(!validateURL(originalUrl)) {
      return res.json({"error":"invalid URL"});
   }    
-  returnResponse(originalUrl,returnUrl);    
-  console.log(result);
+  returnResponse(originalUrl,returnUrl,
+                function(error,result) => ((error){
+    return res.json({"error":"invalid URL"}
+  }else {
+    return res.json(result);         
+  })
+  );      
   
 }
-function postResponse() {
-    return response.json(result);
-}
-
 function returnResponse(urlStr,callback) {
   let shortUrl = '';
   var findQuery = Url.findOne({originalUrl: urlStr});
