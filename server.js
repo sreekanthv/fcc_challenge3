@@ -53,19 +53,23 @@ var urlSchema = new Schema({
 urlSchema.plugin(autoIncrement.plugin, 'id');
 
 var Url = conn.model('Url',urlSchema);
-
+var response;
 
 var validateURL = require('./utils.js').validateURL;
 
 function processPostedInput(req,res) {  
   //console.log(req);
   var originalUrl = req.body.url;
+  response = res;
   if(!validateURL(originalUrl)) {
      return res.json({"error":"invalid URL"});
   }    
   returnResponse(originalUrl,returnUrl);    
   console.log(result);
-  return res.json(result);
+  
+}
+function postResponse() {
+    return response.json(result);
 }
 
 function returnResponse(urlStr,callback) {
@@ -85,7 +89,7 @@ function returnResponse(urlStr,callback) {
 function returnUrl(originalUrl,urlRec) {
   if(urlRec !== undefined) {    
     console.log('no errors');
-    formResult(originalUrl,urlRec['id'])
+    formResult(originalUrl,urlRec['id'],postResponse)
   }
   else {    
     console.log('doesnot exist');
@@ -99,13 +103,17 @@ function createAndSaveUrl(urlStr,callback) {
   if (err){console.log('failed to create url'); callback(err)}
   else {
     console.log(data);
-    callback(null,data['id']);}
+    callback(null,data['id'],postResponse);}
   });
 }
 
-function formResult(err,originalUrl,id,) {
-  if(err) {  ;  
-  result = {original_url: originalUrl,short_url: id};
+function formResult(err,originalUrl,id,callback) {
+  if(err) {
+    callback();
+  } else{
+    result = {original_url: originalUrl,short_url: id};
+  callback();
+  };
 }
 
 
