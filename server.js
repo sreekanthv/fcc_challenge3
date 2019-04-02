@@ -83,7 +83,7 @@ function returnResponse(urlStr,callback) {
 };
 
 function returnUrl(originalUrl,urlRec) {
-  if(urlRec) {    
+  if(urlRec !== undefined) {    
     console.log('no errors');
     return formResult(originalUrl,urlRec['id'])
   }
@@ -94,14 +94,17 @@ function returnUrl(originalUrl,urlRec) {
 }
 
 function createAndSaveUrl(urlStr,callback) {
- var url = new Url({originalUrl: urlStr,shortUrl: urlStr});
+ var url = new Url({originalUrl: urlStr});
  url.save((err, data)=>{
-  if (err){console.log('failed to create url'); callback(err)};
-  callback(null,data['id']);
+  if (err){console.log('failed to create url'); callback(err)}
+  else {
+    console.log(data);
+    callback(null,data['id']);}
   });
 }
 
-function formResult(originalUrl,id) {
+function formResult(err,originalUrl,id) {
+  if(err) { return 'Invalid'};
   var result = {original_url: originalUrl,short_url: id};
   return result;
 }
