@@ -48,8 +48,7 @@ var Schema = mongoose.Schema;
 
 var urlSchema = new Schema({
   id: {type: Number, required: true},
-  originalUrl: String,
-  shortUrl: String});
+  originalUrl: String});
 
 urlSchema.plugin(autoIncrement.plugin, 'id');
 
@@ -64,10 +63,10 @@ function processPostedInput(req,res) {
   if(!validateURL(originalUrl)) {
      return res.json({"error":"invalid URL"});
   }    
-  returnResponse(originalUrl,res,returnUrl);    
+  var result = returnResponse(originalUrl,returnUrl);    
 }
 
-function returnResponse(urlStr,resPonse,callback) {
+function returnResponse(urlStr,callback) {
   let shortUrl = '';
   var findQuery = Url.findOne({originalUrl: urlStr});
   findQuery.exec((err, data)=>{
@@ -85,55 +84,30 @@ function returnResponse(urlStr,resPonse,callback) {
  });
 };
 
-function returnUrl(originalUrl,dbUrl,resPonse) {
-  var result = {original_url: originalUrl,short_url: dbUrl};
+function returnUrl(originalUrl,urlRec) {
   if(dbUrl !== '' || dbUrl !== undefined) {    
-    return formResult(originalUrl,dbUrl,resPonse)
+    return formResult(originalUrl,urlRec['id'],resPonse)
   }
   else {    
     console.log('doesnot exist');
-    return createAndSaveUrl(originalUrl,resPonse,formResult);       
+    return createAndSaveUrl(originalUrl,urlRec['id',formResult);       
   }
 }
 
-function createAndSaveUrl (urlStr,resPonse,callback1) {
- var nextId = getNextId(urlStr,resPonse,SaveUrl,formResult);// get the id
-};
-
-function formResult(originalUrl,shortUrl,resPonse) {
-  var result = {original_url: originalUrl,short_url: shortUrl};
-  resPonse.json(result);
-}
-
-function getNextId(urlStr,resPonse,callback,callback2){
-  var currentId = 0;
-  var findQuery = 
-  findQuery.exec(function(err, maxResult){
-      if (err) {console.log('initial record');
-               callback(null,0,resPonse);}
-      else {
-        currentId = parseInt(maxResult[0]['id']);
-      }
-
-  }); 
- /*if(!isNaN(currentId)) {
-   console.log('got max id ' + currentId);
-   callback(null,urlStr,++currentId,resPonse,callback2)
- }
- else {
-   console.log('invalid id  ' + currentId);
-   callback(null,urlStr,0,resPonse,callback2);
- }*/
-}
-
-function SaveUrl(urlStr,nextId,resPonse,callback) {
- var shortUrl = 'https://spectrum-soybean.glitch.me/api/shorturl/' + nextId;
- var url = new Url({id: nextId, originalUrl: urlStr,shortUrl: shortUrl});
+function createAndSaveUrl(urlStr,callback) {
+ var url = new Url({originalUrl: urlStr,shortUrl: urlStr});
  url.save((err, data)=>{
   if (err){console.log('failed to create url'); callback(err)};
-  callback(null,urlStr,shortUrl,resPonse);
+  callback(null,data);
   });
 }
+
+function formResult(originalUrl,id,resPonse) {
+  var result = {original_url: originalUrl,short_url: shortUrl};
+  return result;
+}
+
+
 app.route(SHORTEN_URL_PATH).post(processPostedInput);
 
 app.listen(port, function () {
