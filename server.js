@@ -64,6 +64,8 @@ function processPostedInput(req,res) {
      return res.json({"error":"invalid URL"});
   }    
   var result = returnResponse(originalUrl,returnUrl);    
+  console.log(result);
+  return res.json(result);
 }
 
 function returnResponse(urlStr,callback) {
@@ -75,22 +77,19 @@ function returnResponse(urlStr,callback) {
     callback(err);
   }
   else {
-    console.log('fetched from db ' + data['shortUrl']);
-    console.log( typeof (data['shortUrl']));
-    shortUrl = data['shortUrl'];
-    console.log(shortUrl);
-    callback(null,urlStr,shortUrl,resPonse);
+    callback(null,urlStr,data);
   }
  });
 };
 
 function returnUrl(originalUrl,urlRec) {
-  if(dbUrl !== '' || dbUrl !== undefined) {    
-    return formResult(originalUrl,urlRec['id'],resPonse)
+  if(urlRec) {    
+    console.log('no errors');
+    return formResult(originalUrl,urlRec['id'])
   }
   else {    
     console.log('doesnot exist');
-    return createAndSaveUrl(originalUrl,urlRec['id',formResult);       
+    return createAndSaveUrl(originalUrl,formResult);       
   }
 }
 
@@ -98,12 +97,12 @@ function createAndSaveUrl(urlStr,callback) {
  var url = new Url({originalUrl: urlStr,shortUrl: urlStr});
  url.save((err, data)=>{
   if (err){console.log('failed to create url'); callback(err)};
-  callback(null,data);
+  callback(null,data['id']);
   });
 }
 
-function formResult(originalUrl,id,resPonse) {
-  var result = {original_url: originalUrl,short_url: shortUrl};
+function formResult(originalUrl,id) {
+  var result = {original_url: originalUrl,short_url: id};
   return result;
 }
 
