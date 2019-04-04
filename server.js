@@ -16,6 +16,8 @@ var ROOT_PATH = '/';
 var SHORTEN_URL_PATH = ROOT_PATH + 'api/shorturl/new';
 app.use(ROOT_PATH,bodyParse);
 
+var SHORT_URL_PATH = ROOT_PATH + 'api/shorturl/:id';
+
 var cors = require('cors');
 
 var result ;
@@ -80,6 +82,18 @@ function shortenURL(req,res) {
   }
 }
 app.route(SHORTEN_URL_PATH).post(shortenURL);
+
+function redirectURL(req,res) {
+  console.log(req.path.id);
+ Url.findOne({id : req.path.id},
+                               function (err,data){
+                               if(err || !data ) {res.json({error: 'Invalid Url'});}
+                               else { console.log(data); 
+                                     res.writeHead(301,{Location: data['orignalUrl']});response.end();}}
+    ); 
+}
+
+app.route(SHORT_URL_PATH).get(redirectURL);
 
 app.listen(port, function () {
   console.log('Node.js listening ...');
