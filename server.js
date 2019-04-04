@@ -84,12 +84,12 @@ function shortenURL(req,res) {
 app.route(SHORTEN_URL_PATH).post(shortenURL);
 
 function redirectURL(req,res) {
-  console.log(req.path.id);
- Url.findOne({id : req.path.id},
+  console.log(req.params.id);
+ Url.findOne({id : req.params.id},
                                function (err,data){
                                if(err || !data ) {res.json({error: 'Invalid Url'});}
                                else { console.log(data); 
-                                     res.writeHead(301,{Location: data['orignalUrl']});response.end();}}
+                                     res.writeHead(301,{Location: data['originalUrl']});res.end();}}
     ); 
 }
 
