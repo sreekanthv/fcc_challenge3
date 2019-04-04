@@ -42,8 +42,6 @@ app.get("/api/hello", function (req, res) {
 
 /** this project needs a db !! **/ 
 var conn = mongoose.createConnection(process.env.MONGOLAB_URI,{ useNewUrlParser: true });
-autoIncrement.initialize(conn);
-
 
 //db details
 var Schema = mongoose.Schema;
@@ -52,18 +50,9 @@ var urlSchema = new Schema({
   id: {type: Number, required: true},
   originalUrl: String});
 
-urlSchema.plugin(autoIncrement.plugin, 'id');
-
 var Url = conn.model('Url',urlSchema);
 var response;
 
-
-
-function processPostedInput(req,res) {  
-  //console.log(req);
- 
-  
-}
 function findInDB(urlStr,callback) {
   let shortUrl = '';
   var findQuery = Url.findOne({originalUrl: urlStr});
@@ -111,10 +100,23 @@ function formResult(err,originalUrl,id,callback) {
 
 function shortenURL(req,res) {
   var result = {error : 'Invalid URL'};
-  var inputURL  = 
-  var isValidURL = utils.validateURL(req.body.url);
+  var inputURL  = req.body.url;
+  var isValidURL = utils.validateURL(inputURL);
   if(isValidURL) {
-    var findQuery = Url.findOne({originalUrl: })
+    Url.findOne({originalUrl: inputURL},
+                               function (err,data){
+                               if(err) {insertAndReturn(inputURL);}
+                               else { res.json({original_url: inputURL, short_url: data['id']});}}
+    );
+    function insertAndReturn(inputUrl) {
+      var randomID = (Math.Random() * 100000);
+      var data = {origin_url: inputUrl,short_url: randomID};
+      var url = new Url();
+       url.save((err, data)=>{
+       if (err){console.log('failed to create url');}
+       else {}
+  });
+    }
   }
   else {
     var isExisting = 
