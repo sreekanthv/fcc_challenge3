@@ -9,6 +9,8 @@ var app = express();
 var bodyParser = require('body-parser');
 var bodyParse = bodyParser.urlencoded({extended: false});
 
+var utils = require('./utils.js');
+
 //paths
 var ROOT_PATH = '/';
 var SHORTEN_URL_PATH = ROOT_PATH + 'api/shorturl/new';
@@ -55,27 +57,14 @@ urlSchema.plugin(autoIncrement.plugin, 'id');
 var Url = conn.model('Url',urlSchema);
 var response;
 
-var validateURL = require('./utils.js').validateURL;
+
 
 function processPostedInput(req,res) {  
   //console.log(req);
-  var originalUrl = req.body.url;
-  response = res;
-  if(!validateURL(originalUrl)) {
-     return res.json({"error":"invalid URL"});
-  }    
-  returnResponse(originalUrl,returnUrl,
-                function postResponse(error,result) {
-      if(error){
-        return res.json({"error":"invalid URL"});
-      }else {
-        return res.json(result);   
-      }
-    }
-  );      
+ 
   
 }
-function returnResponse(urlStr,callback) {
+function findInDB(urlStr,callback) {
   let shortUrl = '';
   var findQuery = Url.findOne({originalUrl: urlStr});
   findQuery.exec((err, data)=>{
@@ -120,7 +109,19 @@ function formResult(err,originalUrl,id,callback) {
 }
 
 
-app.route(SHORTEN_URL_PATH).post(processPostedInput);
+function shortenURL(req,res) {
+  var result = {error : 'Invalid URL'};
+  var inputURL  = 
+  var isValidURL = utils.validateURL(req.body.url);
+  if(isValidURL) {
+    var findQuery = Url.findOne({originalUrl: })
+  }
+  else {
+    var isExisting = 
+    res.json(result);
+  }
+}
+app.route(SHORTEN_URL_PATH).post(shortenURL);
 
 app.listen(port, function () {
   console.log('Node.js listening ...');
